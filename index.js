@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 //middleware;
 app.use(cors());
@@ -16,14 +16,32 @@ async function run() {
     try {
         await client.connect();
         const productCollection = client.db('productsCollection').collection('product');
-        app.post('/product', async (req, res) => {
-            const doc = {
-                title: "Record of a Shriveled Datum",
-                content: "No bytes, no problem. Just insert a document, in MongoDB",
-            }
-            const result = await productCollection.insertOne(doc);
-            console.log(result)
+        app.get('/product', async (req, res) => {
+            const query = {}
+            const cursor = productCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result);
+        })
+        //singel product with id;
+        app.get('/product/:id' ,async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await productCollection.findOne(query)
+            res.send(result);
+        })
+        app.put('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const data = req.body;
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: data.quantity
+                },
+            };
+            const result = await productCollection.updateOne(filter, updateDoc, options);
             res.send(result)
+            
         })
         
     }
