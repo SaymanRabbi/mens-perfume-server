@@ -16,6 +16,11 @@ async function run() {
     try {
         await client.connect();
         const productCollection = client.db('productsCollection').collection('product');
+        app.post('/product', async (req, res) => {
+            const data = req.body
+            const result = await productCollection.insertOne(data)
+            res.send(result)
+        })
         app.get('/product', async (req, res) => {
             const query = {}
             const serchresult = req.query.location;
