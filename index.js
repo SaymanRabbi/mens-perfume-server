@@ -18,8 +18,17 @@ async function run() {
         const productCollection = client.db('productsCollection').collection('product');
         app.get('/product', async (req, res) => {
             const query = {}
+            const serchresult = req.query.location;
+            console.log(serchresult);
             const cursor = productCollection.find(query)
-            const result = await cursor.toArray()
+            let result;
+            if (serchresult === 'manages') {
+                result = await cursor.toArray()
+            }
+            else {
+                 result = await cursor.limit(6).toArray()
+            }
+            
             res.send(result);
         })
         //singel product with id;
@@ -29,6 +38,7 @@ async function run() {
             const result = await productCollection.findOne(query)
             res.send(result);
         })
+        //update product
         app.put('/product/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -42,6 +52,13 @@ async function run() {
             const result = await productCollection.updateOne(filter, updateDoc, options);
             res.send(result)
             
+        })
+        //delete product
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await productCollection.deleteOne(query);
+            res.send(result)
         })
         
     }
