@@ -21,10 +21,17 @@ async function run() {
             const result = await productCollection.insertOne(data)
             res.send(result)
         })
+        //my item
+        app.get('/myitem', async (req, res) => {
+            const email = req.query.result;
+            const query = { email };
+            const cursor = productCollection.find(query);
+            const orders = await cursor.toArray()
+            res.send(orders)
+        })
         app.get('/product', async (req, res) => {
             const query = {}
             const serchresult = req.query.location;
-            console.log(serchresult);
             const cursor = productCollection.find(query)
             let result;
             if (serchresult === 'manages') {
