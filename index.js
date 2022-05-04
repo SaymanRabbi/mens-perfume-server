@@ -3,12 +3,27 @@ const app = express()
 const cors = require('cors')
 const port = process.env.PORT || 5000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 //middleware;
 app.use(cors());
 app.use(express.json());
 
-
+function verifyidentity(req,res,next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+       return res.status(401).send({messages:"Unauthorized access"})
+    }
+    const authtoken = authHeader.split(' ')[1]
+     jwt.verify(authtoken,process.env.TOKEN_SECRET,function(err, decoded) {
+         if (err) {
+            return res.status(403).send({messages:"Forbiden"})
+         }
+         req.decoded = decoded;
+         next()
+      })
+    
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yx5wc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -22,12 +37,18 @@ async function run() {
             res.send(result)
         })
         //my item
-        app.get('/myitem', async (req, res) => {
+        app.get('/myitem', verifyidentity, async (req, res) => {
+            const decodedEmail = req.decoded.value;
             const email = req.query.result;
-            const query = { email };
+            if (email === decodedEmail) {
+                const query = { email };
             const cursor = productCollection.find(query);
             const orders = await cursor.toArray()
             res.send(orders)
+            }
+            else {
+                res.status(403).send({messages:"You Not Verify Your Identity"})
+            }
         })
         app.get('/product', async (req, res) => {
             const query = {}
@@ -72,7 +93,15 @@ async function run() {
             const result = await productCollection.deleteOne(query);
             res.send(result)
         })
-        
+        //jwt token
+        app.post('/token', async (req, res) => {
+            const userEmail = req.body;
+            console.log(userEmail)
+            const createToken = jwt.sign(userEmail, process.env.TOKEN_SECRET, {
+                expiresIn:'1d'
+            })
+            res.send({createToken})
+        })
     }
     finally {
         // await client.close()
