@@ -15,6 +15,7 @@ function verifyidentity(req,res,next) {
        return res.status(401).send({messages:"Unauthorized access"})
     }
     const authtoken = authHeader.split(' ')[1]
+
      jwt.verify(authtoken,process.env.TOKEN_SECRET,function(err, decoded) {
          if (err) {
             return res.status(403).send({messages:"Forbiden"})
@@ -38,7 +39,7 @@ async function run() {
         })
         //my item
         app.get('/myitem', verifyidentity, async (req, res) => {
-            const decodedEmail = req.decoded.value;
+            const decodedEmail = req.decoded.emails;
             const email = req.query.result;
             if (email === decodedEmail) {
                 const query = { email };
@@ -96,7 +97,6 @@ async function run() {
         //jwt token
         app.post('/token', async (req, res) => {
             const userEmail = req.body;
-            console.log(userEmail)
             const createToken = jwt.sign(userEmail, process.env.TOKEN_SECRET, {
                 expiresIn:'1d'
             })
