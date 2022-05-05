@@ -32,10 +32,18 @@ async function run() {
     try {
         await client.connect();
         const productCollection = client.db('productsCollection').collection('product');
-        app.post('/product', async (req, res) => {
+        app.post('/product', verifyidentity,async (req, res) => {
+            const useremail = req.query.email;
             const data = req.body
-            const result = await productCollection.insertOne(data)
-            res.send(result)
+            const decodedEmail = req.decoded.emails;
+            if (useremail === decodedEmail) {
+                const result = await productCollection.insertOne(data)
+                res.send(result)
+            }
+            else {
+                res.status(403).send({messages:"You Not Verify Your Identity"})
+            }
+           
         })
         //my item
         app.get('/myitem', verifyidentity, async (req, res) => {
