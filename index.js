@@ -33,9 +33,9 @@ async function run() {
         await client.connect();
         const productCollection = client.db('productsCollection').collection('product');
         app.post('/product', verifyidentity,async (req, res) => {
-            const useremail = req.query.email;
-            const data = req.body
+            const useremail = req.query.email
             const decodedEmail = req.decoded.emails;
+            const data = req.body
             if (useremail === decodedEmail) {
                 const result = await productCollection.insertOne(data)
                 res.send(result)
