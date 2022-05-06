@@ -61,16 +61,15 @@ async function run() {
         })
         app.get('/product', async (req, res) => {
             const query = {}
-            // const serchresult = req.query.location;
+            const serchresult = req.query.location;
             const cursor = productCollection.find(query)
             let result;
-            // if (serchresult === 'manages') {
+            if (serchresult === 'manages') {
                 result = await cursor.toArray()
-            // }
-            // else {
-            //      result = await cursor.limit(6).toArray()
-            // }
-            
+            }
+            else {
+                 result = await cursor.limit(6).toArray()
+            }
             res.send(result);
         })
         //singel product with id;
