@@ -62,10 +62,14 @@ async function run() {
         app.get('/product', async (req, res) => {
             const query = {}
             const serchresult = req.query.location;
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            console.log(page,size);
             const cursor = productCollection.find(query)
             let result;
-            if (serchresult === 'manages') {
-                result = await cursor.toArray()
+            if (page || size) {
+                console.log('inside')
+                result = await cursor.skip(page*size).limit(6).toArray()
             }
             else {
                  result = await cursor.limit(6).toArray()
@@ -108,6 +112,13 @@ async function run() {
                 expiresIn:'1d'
             })
             res.send({createToken})
+        })
+        //product count
+        app.get('/productcount', async (req, res) => {
+            const query = {}
+            const cursor = productCollection.find(query)
+            const result = await productCollection.estimatedDocumentCount()
+            res.send({result})
         })
     }
     finally {
