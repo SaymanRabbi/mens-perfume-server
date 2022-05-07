@@ -61,10 +61,8 @@ async function run() {
         })
         app.get('/product', async (req, res) => {
             const query = {}
-            const serchresult = req.query.location;
             const page = parseInt(req.query.page)
             const size = parseInt(req.query.size)
-            console.log(page,size);
             const cursor = productCollection.find(query)
             let result;
             if (page || size) {
